@@ -1,92 +1,112 @@
-import { Request, Response } from "express";
 import dns = require("node:dns");
-const dnsPromises = dns.promises;
 
-// interface RequestQuery {
-//   foo: string;
-// }
+const NAME = "www.finalsite.com";
 
-export async function lookup(req: Request, res: Response) {
-  const name = req.query.name as string;
-  // const type = req.query.type || 1;
+async function _resolveNs(name: string) {
+  try {
+    const answer = await dns.promises.resolveNs(name);
+    return { ns: answer };
+  } catch (e) {
+    return { ns: null };
+  }
+}
 
-  if (!name) {
-    return res
-      .status(400)
-      .json({ message: "Missing required 'name' parameter" });
+async function _resolve4(name: string) {
+  try {
+    const answer = await dns.promises.resolve4(name, { ttl: true });
+    return { ipv4: answer };
+  } catch (e) {
+    return { ipv4: null };
+  }
+}
+
+async function _resolve6(name: string) {
+  try {
+    const answer = await dns.promises.resolve6(name, { ttl: true });
+    return { ipv6: answer };
+  } catch (e) {
+    return { ipv6: null };
+  }
+}
+
+async function _resolveCname(name: string) {
+  try {
+    const answer = await dns.promises.resolveCname(name);
+    return { cname: answer };
+  } catch (e) {
+    return { cname: null };
+  }
+}
+
+async function _resolveCaa(name: string) {
+  try {
+    const answer = await dns.promises.resolveCaa(name);
+    return { caa: answer };
+  } catch (e) {
+    return { caa: null };
+  }
+}
+
+async function _resolveMx(name: string) {
+  try {
+    const answer = await dns.promises.resolveMx(name);
+    return { mx: answer };
+  } catch (e) {
+    return { mx: null };
+  }
+}
+
+async function _resolveTxt(name: string) {
+  try {
+    const answer = await dns.promises.resolveTxt(name);
+    return { txt: answer };
+  } catch (e) {
+    return { txt: null };
+  }
+}
+
+async function run(name: string) {
+  let { ns } = await _resolveNs(name);
+  let apex = name;
+
+  while (!ns && apex.indexOf(".") > -1) {
+    apex = apex.slice(apex.indexOf(".") + 1);
+    ({ ns } = await _resolveNs(apex));
   }
 
-  // const getServers = await dnsPromises.getServers();
-  // const resolve = await dnsPromises.resolve(name);
-  const resolve4 = await dnsPromises.resolve4(name);
-  const resolve6 = await dnsPromises.resolve6(name);
-  const resolveAny = await dnsPromises.resolveAny(name);
-  // const resolveCaa = await dnsPromises.resolveCaa(name);
-  const resolveCname = await dnsPromises.resolveCname(name);
-  // const resolveMx = await dnsPromises.resolveMx(name);
-  // const resolveNaptr = await dnsPromises.resolveNaptr(name);
-  // const resolveNs = await dnsPromises.resolveNs(name);
-  // const resolvePtr = await dnsPromises.resolvePtr(name);
-  // const resolveSoa = await dnsPromises.resolveSoa(name);
-  // const resolveSrv = await dnsPromises.resolveSrv(name);
-  // const resolveTxt = await dnsPromises.resolveTxt(name);
-  // const reverse = await dnsPromises.reverse(name);
+  if (!ns) return;
 
-  return res.status(200).json({
-    // getServers,
-    // resolve,
-    resolve4,
-    resolve6,
-    resolveAny,
-    // resolveCaa,
-    resolveCname,
-    // resolveMx,
-    // resolveNaptr,
-    // resolveNs,
-    // resolvePtr,
-    // resolveSoa,
-    // resolveSrv,
-    // resolveTxt,
-    // reverse,
-  });
+  return await Promise.all(
+    ns.map(async (nsName) => {
+      const { ipv4: nsIPs } = await _resolve4(nsName);
+
+      if (!nsIPs) {
+        return { ns: nsName, nsIPs };
+      }
+
+      dns.promises.setServers(nsIPs.map((ip) => ip.address));
+
+      const nsRecords = (
+        await Promise.all([
+          _resolve4(name),
+          _resolve6(name),
+          _resolveCname(name),
+          _resolveCaa(name),
+          _resolveMx(name),
+          _resolveTxt(name),
+        ])
+      ).reduce((a, c) => {
+        return { ...a, ...c };
+      }, {});
+
+      return { ns: nsName, ips: nsIPs, records: nsRecords };
+    })
+  );
 }
 
-export async function test() {
-  const name = "www.finalsite.com";
-
-  // const getServers = await dnsPromises.getServers();
-  // const resolve = await dnsPromises.resolve(name);
-  const resolve4 = await dnsPromises.resolve4(name);
-  const resolve6 = await dnsPromises.resolve6(name);
-  const resolveAny = await dnsPromises.resolveAny(name);
-  // const resolveCaa = await dnsPromises.resolveCaa(name);
-  const resolveCname = await dnsPromises.resolveCname(name);
-  // const resolveMx = await dnsPromises.resolveMx(name);
-  // const resolveNaptr = await dnsPromises.resolveNaptr(name);
-  // const resolveNs = await dnsPromises.resolveNs(name);
-  // const resolvePtr = await dnsPromises.resolvePtr(name);
-  // const resolveSoa = await dnsPromises.resolveSoa(name);
-  // const resolveSrv = await dnsPromises.resolveSrv(name);
-  // const resolveTxt = await dnsPromises.resolveTxt(name);
-  // const reverse = await dnsPromises.reverse(name);
-
-  return {
-    // getServers,
-    // resolve,
-    resolve4,
-    resolve6,
-    resolveAny,
-    // resolveCaa,
-    resolveCname,
-    // resolveMx,
-    // resolveNaptr,
-    // resolveNs,
-    // resolvePtr,
-    // resolveSoa,
-    // resolveSrv,
-    // resolveTxt,
-    // reverse,
-  };
+async function test() {
+  const results = await run(NAME);
+  console.log(results);
 }
 
-console.log(test());
+test();
