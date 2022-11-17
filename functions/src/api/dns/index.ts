@@ -2,6 +2,16 @@ import dns = require("node:dns");
 
 const NAME = "www.finalsite.com";
 
+type DNSRecords = {
+  ns?: string[];
+  ipv4?: dns.RecordWithTtl[];
+  ipv6?: dns.RecordWithTtl[];
+  cname?: string[];
+  caa?: dns.CaaRecord[];
+  mx?: dns.MxRecord[];
+  txt?: string[][];
+};
+
 async function _resolveNs(name: string) {
   try {
     const answer = await dns.promises.resolveNs(name);
@@ -95,8 +105,10 @@ async function run(name: string) {
           _resolveMx(name),
           _resolveTxt(name),
         ])
-      ).reduce((a, c) => {
-        return { ...a, ...c };
+      ).reduce((a: DNSRecords, c) => {
+        const key = Object.keys(c)[0];
+        a[key as keyof DNSRecords] = c[key as keyof typeof c];
+        return a;
       }, {});
 
       return { ns: nsName, ips: nsIPs, records: nsRecords };
