@@ -69,4 +69,4 @@ node_modules/
 # icon library
 src/assets/fontawesome
 
-*DS_Store*
+**/.DS_Store

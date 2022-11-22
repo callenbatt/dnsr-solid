@@ -2,6 +2,8 @@ import { Box, FormControlLabel, IconButton, Input } from "@hope-ui/core";
 import { createSignal, createResource } from "solid-js";
 import { SearchIcon } from "./assets/icons/SearchIcon";
 
+// https://dns.google/resolve?
+
 type QueryJSON = {
   Question?: string[];
   Answer?: string[];
@@ -28,7 +30,6 @@ export function QueryInput() {
         rounded="lg"
         shadow="lg"
         w="full"
-        maxW={96}
         bg="white"
         _dark={{
           borderColor: "neutral.800",

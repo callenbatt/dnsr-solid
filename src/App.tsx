@@ -1,8 +1,12 @@
 import type { Component } from "solid-js";
 import { QueryInput } from "./QueryInput";
-
+import { Header } from "./Header";
 const App: Component = () => {
-  return <QueryInput />;
+  return (
+    <>
+      <Header />
+    </>
+  );
 };
 
 export default App;
