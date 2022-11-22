@@ -4,23 +4,25 @@ import { SearchIcon } from "./assets/icons/SearchIcon";
 
 // https://dns.google/resolve?
 
-type QueryJSON = {
-  Question?: string[];
-  Answer?: string[];
-};
-const fetchQuery = async (name: string): Promise<QueryJSON> =>
-  (
-    await fetch(`https://cloudflare-dns.com/dns-query?name=${name}`, {
-      headers: { accept: "application/dns-json" },
-    })
-  ).json();
+// type QueryJSON = {
+//   Question?: string[];
+//   Answer?: string[];
+// };
+// const fetchQuery = async (name: string): Promise<QueryJSON> =>
+//   (
+//     await fetch(`https://cloudflare-dns.com/dns-query?name=${name}`, {
+//       headers: { accept: "application/dns-json" },
+//     })
+//   ).json();
 
-export function QueryInput() {
+export function QueryInput(props: {
+  handleHostname: (hostname: string) => void;
+}) {
   let hostnameInput: HTMLInputElement | undefined;
 
-  const [hostname, setHostname] = createSignal<string>();
+  // const [hostname, setHostname] = createSignal<string>();
 
-  const [query] = createResource(hostname, fetchQuery);
+  // const [query] = createResource(hostname, fetchQuery);
 
   return (
     <>
@@ -40,15 +42,13 @@ export function QueryInput() {
         <IconButton
           aria-label="Search"
           variant="solid"
-          onClick={(e) => hostnameInput && setHostname(hostnameInput.value)}
+          onClick={(e) =>
+            hostnameInput && props.handleHostname(hostnameInput.value)
+          }
         >
           <SearchIcon />
         </IconButton>
       </Box>
-
-      <div>
-        <pre>{JSON.stringify(query(), null, 2)}</pre>
-      </div>
     </>
   );
 }
