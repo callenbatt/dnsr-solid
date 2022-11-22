@@ -65,3 +65,8 @@ node_modules/
 
 # dotenv environment variables file
 .env
+
+# icon library
+src/assets/fontawesome
+
+*DS_Store*
