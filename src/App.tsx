@@ -3,10 +3,16 @@ import { QueryInput } from "./QueryInput";
 import { Header } from "./Header";
 // https://dns.google/resolve?
 
+import { functions } from "./firebase";
+import { httpsCallable } from "firebase/functions";
+
 type QueryJSON = {
   Question?: string[];
   Answer?: string[];
 };
+
+const dnsTest = httpsCallable(functions, "dnstest");
+
 const fetchQuery = async (name: string): Promise<QueryJSON> =>
   (
     await fetch(`https://cloudflare-dns.com/dns-query?name=${name}`, {
@@ -17,7 +23,7 @@ const fetchQuery = async (name: string): Promise<QueryJSON> =>
 const App: Component = () => {
   const [hostname, setHostname] = createSignal<string>();
 
-  const [query] = createResource(hostname, fetchQuery);
+  const [query] = createResource(hostname, dnsTest);
 
   return (
     <>

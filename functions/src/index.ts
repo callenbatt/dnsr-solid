@@ -12,3 +12,8 @@ export const api = functions.https.onRequest(app);
 
 // router.method(route, callback)
 router.get("/dns", dnsQuery);
+
+export const dnstest = functions.https.onCall((data, context) => {
+  console.log("hello");
+  return { message: "hello" };
+});
