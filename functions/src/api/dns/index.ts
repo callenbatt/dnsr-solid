@@ -102,7 +102,7 @@ async function resolveAll(name: string, nsIPs: dns.RecordWithTtl[]) {
   }, {});
 }
 
-async function resolveAuthoritative(name: string) {
+export async function resolveAuthoritative(name: string) {
   let { ns } = await _resolveNs(name);
   let apex = name;
 

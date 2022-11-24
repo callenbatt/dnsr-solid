@@ -1,5 +1,5 @@
 import { Component, createResource, createSignal } from "solid-js";
-import { QueryInput } from "./QueryInput";
+// import { QueryInput } from "./QueryInput";
 import { Header } from "./Header";
 // https://dns.google/resolve?
 
@@ -11,19 +11,23 @@ type QueryJSON = {
   Answer?: string[];
 };
 
-const dnsTest = httpsCallable(functions, "dnstest");
+// const dnsTest: HttpsCallableResult = httpsCallable(functions, "dnstest");
 
-const fetchQuery = async (name: string): Promise<QueryJSON> =>
-  (
-    await fetch(`https://cloudflare-dns.com/dns-query?name=${name}`, {
-      headers: { accept: "application/dns-json" },
-    })
-  ).json();
+const callAuthoratativeQuery = async (hostname: string) => {
+  const authoratativeQuery = httpsCallable(functions, "authoratativeQuery");
+  return await authoratativeQuery({ hostname });
+};
+// const fetchQuery = async (name: string): Promise<QueryJSON> =>
+//   (
+//     await fetch(`https://cloudflare-dns.com/dns-query?name=${name}`, {
+//       headers: { accept: "application/dns-json" },
+//     })
+//   ).json();
 
 const App: Component = () => {
   const [hostname, setHostname] = createSignal<string>();
 
-  const [query] = createResource(hostname, dnsTest);
+  const [query] = createResource(hostname, callAuthoratativeQuery);
 
   return (
     <>
