@@ -1,7 +1,7 @@
 import dns = require("node:dns");
 import { Request, Response } from "express";
 
-type DNSRecords = {
+export type DNSRecords = {
   ns?: string[];
   ipv4?: dns.RecordWithTtl[];
   ipv6?: dns.RecordWithTtl[];

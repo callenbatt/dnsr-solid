@@ -1,40 +1,76 @@
 import { Component, createResource, createSignal } from "solid-js";
 // import { QueryInput } from "./QueryInput";
 import { Header } from "./Header";
-// https://dns.google/resolve?
-
+import { AuthoritativeAnswer } from "./AuthoritativeAnswer";
+import { RecordWithTtl } from "node:dns";
+import { DNSRecords } from "../functions/src/api/dns";
 import { functions } from "./firebase";
 import { httpsCallable } from "firebase/functions";
+import { Flex, Box } from "@hope-ui/core";
 
 type QueryJSON = {
   Question?: string[];
   Answer?: string[];
 };
 
+type NameserverAnswer = {
+  ns: string;
+  ips: RecordWithTtl[];
+  records: DNSRecords;
+};
+
 // const dnsTest: HttpsCallableResult = httpsCallable(functions, "dnstest");
 
 const callAuthoratativeQuery = async (hostname: string) => {
-  const authoratativeQuery = httpsCallable(functions, "authoratativeQuery");
-  return await authoratativeQuery({ hostname });
+  const authoratativeQuery = httpsCallable<
+    { hostname: string },
+    NameserverAnswer[]
+  >(functions, "authoratativeQuery");
+  const { data } = await authoratativeQuery({
+    hostname,
+  });
+  return data;
 };
-// const fetchQuery = async (name: string): Promise<QueryJSON> =>
-//   (
-//     await fetch(`https://cloudflare-dns.com/dns-query?name=${name}`, {
-//       headers: { accept: "application/dns-json" },
-//     })
-//   ).json();
+
+const callCloudflareQuery = async (hostname: string) => {
+  const res = await fetch(
+    `https://cloudflare-dns.com/dns-query?name=${hostname}`,
+    {
+      headers: { accept: "application/dns-json" },
+    }
+  );
+  return await res.json();
+};
+
+const callGoogleQuery = async (hostname: string) => {
+  const res = await fetch(`https://dns.google/resolve?name=${hostname}`);
+  return await res.json();
+};
 
 const App: Component = () => {
   const [hostname, setHostname] = createSignal<string>();
 
-  const [query] = createResource(hostname, callAuthoratativeQuery);
+  const [authoritativeAnswer] = createResource(
+    hostname,
+    callAuthoratativeQuery
+  );
 
+  const [cloudflareAnswer] = createResource(hostname, callCloudflareQuery);
+
+  const [googleAnswer] = createResource(hostname, callGoogleQuery);
   return (
     <>
       <Header handleHostname={setHostname} />
-      <div>
-        <pre>{JSON.stringify(query(), null, 2)}</pre>
-      </div>
+      <Flex>
+        <AuthoritativeAnswer authoritativeAnswer={authoritativeAnswer()} />
+
+        <Box>
+          <pre>{JSON.stringify(cloudflareAnswer(), null, 2)}</pre>
+        </Box>
+        <Box>
+          <pre>{JSON.stringify(googleAnswer(), null, 2)}</pre>
+        </Box>
+      </Flex>
     </>
   );
 };
