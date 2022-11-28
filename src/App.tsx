@@ -7,7 +7,7 @@ import { DNSRecords } from "../functions/src/api/dns";
 import { functions } from "./firebase";
 import { httpsCallable } from "firebase/functions";
 import { Flex, Box } from "@hope-ui/core";
-import { Record } from "./components/dns/Record";
+
 type QueryJSON = {
   Question?: string[];
   Answer?: string[];
