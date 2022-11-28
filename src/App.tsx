@@ -7,7 +7,7 @@ import { DNSRecords } from "../functions/src/api/dns";
 import { functions } from "./firebase";
 import { httpsCallable } from "firebase/functions";
 import { Flex, Box } from "@hope-ui/core";
-import { Record } from "./components/dns/Records";
+import { Record } from "./components/dns/Record";
 type QueryJSON = {
   Question?: string[];
   Answer?: string[];
@@ -61,8 +61,14 @@ const App: Component = () => {
   return (
     <>
       <Header handleHostname={setHostname} />
-      <Flex width="fit-content" justifyContent="center">
+      <Flex w="fit-content" justifyContent="center">
         <AuthoritativeAnswer authoritativeAnswer={authoritativeAnswer()} />
+        <Box flexGrow="1">
+          <pre>{JSON.stringify(cloudflareAnswer(), null, 2)}</pre>
+        </Box>
+        <Box flexGrow="1">
+          <pre>{JSON.stringify(googleAnswer(), null, 2)}</pre>
+        </Box>
       </Flex>
     </>
   );
