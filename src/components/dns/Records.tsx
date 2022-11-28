@@ -1,5 +1,5 @@
 import { Box } from "@hope-ui/core";
-import { RecordWithTtl, CaaRecord } from "node:dns";
+import { RecordWithTtl, CaaRecord, MxRecord } from "node:dns";
 import { For } from "solid-js";
 
 export function Record(props: { type: string; value: string; ttl?: number }) {
@@ -117,16 +117,37 @@ export function CNAME(props: { cname: string[] }) {
 }
 
 export function CAA(props: { caa: CaaRecord[] }) {
-  // const value = `critical: ${props.caa.critial}`
-  // critial: number;
-  // issue?: string | undefined;
-  // issuewild?: string | undefined;
-  // iodef?: string | undefined;
-  // contactemail?: string | undefined;
-  // contactphone?: string | undefined;
   return (
     <For each={props.caa}>
-      {(record) => <Record type="CAA" value="hello" />}
+      {(record) => (
+        <Record
+          type="CAA"
+          value={`critical: ${record.critical} ${
+            record.issue ? `; issue: ${record.issue}` : ``
+          } ${record.issuewild ? `; issuewild: ${record.issuewild}` : ``}`}
+        />
+      )}
+    </For>
+  );
+}
+
+export function MX(props: { mx: MxRecord[] }) {
+  return (
+    <For each={props.mx}>
+      {(record) => (
+        <Record
+          type="MX"
+          value={`priority: ${record.priority}; exchange: ${record.exchange}`}
+        />
+      )}
+    </For>
+  );
+}
+
+export function TXT(props: { txt: string[][] }) {
+  return (
+    <For each={props.txt}>
+      {(record) => <Record type="TXT" value={record.join(", ")} />}
     </For>
   );
 }

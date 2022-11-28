@@ -3,7 +3,7 @@ import { Box } from "@hope-ui/core";
 
 import { RecordWithTtl } from "node:dns";
 import { DNSRecords } from "../../../functions/src/api/dns";
-import { CAA, CNAME, IPV4, IPV6 } from "./Records";
+import { CAA, CNAME, IPV4, IPV6, MX, TXT } from "./Records";
 
 type NameserverAnswer = {
   ns: string;
@@ -78,6 +78,8 @@ export function AuthoritativeAnswer(props: {
                 <CNAME cname={answer.records.cname}></CNAME>
               )}
               {answer.records.caa && <CAA caa={answer.records.caa}></CAA>}
+              {answer.records.mx && <MX mx={answer.records.mx}></MX>}
+              {answer.records.txt && <TXT txt={answer.records.txt}></TXT>}
             </Box>
           )}
         </For>
