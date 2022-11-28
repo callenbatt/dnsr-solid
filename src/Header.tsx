@@ -4,7 +4,7 @@ import { QueryInput } from "./QueryInput";
 
 export function Header(props: { handleHostname: (hostname: string) => void }) {
   return (
-    <Flex marginTop={4} alignItems="center">
+    <Flex marginTop={4} alignItems="center" marginBottom={4}>
       <Box marginLeft={4} maxWidth={24}>
         <Image src={LogoSticker} objectFit="cover" />
       </Box>

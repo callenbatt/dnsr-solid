@@ -1,13 +1,13 @@
 import { Component, createResource, createSignal } from "solid-js";
 // import { QueryInput } from "./QueryInput";
 import { Header } from "./Header";
-import { AuthoritativeAnswer } from "./AuthoritativeAnswer";
+import { AuthoritativeAnswer } from "./components/dns/AuthoritativeAnswer";
 import { RecordWithTtl } from "node:dns";
 import { DNSRecords } from "../functions/src/api/dns";
 import { functions } from "./firebase";
 import { httpsCallable } from "firebase/functions";
 import { Flex, Box } from "@hope-ui/core";
-
+import { Record } from "./components/dns/Record";
 type QueryJSON = {
   Question?: string[];
   Answer?: string[];
@@ -61,13 +61,16 @@ const App: Component = () => {
   return (
     <>
       <Header handleHostname={setHostname} />
-      <Flex>
+      <Flex w="full" justifyContent="center">
         <AuthoritativeAnswer authoritativeAnswer={authoritativeAnswer()} />
 
-        <Box>
+        <Box maxWidth={64} flexGrow="1">
+          <pre>{JSON.stringify(authoritativeAnswer(), null, 2)}</pre>
+        </Box>
+        <Box flexGrow="1">
           <pre>{JSON.stringify(cloudflareAnswer(), null, 2)}</pre>
         </Box>
-        <Box>
+        <Box flexGrow="1">
           <pre>{JSON.stringify(googleAnswer(), null, 2)}</pre>
         </Box>
       </Flex>
