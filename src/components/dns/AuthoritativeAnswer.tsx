@@ -72,14 +72,14 @@ export function AuthoritativeAnswer(props: {
                   </Box>
                 </Box>
               </Box>
-              {answer.records.ipv4 && <IPV4 ipv4={answer.records.ipv4}></IPV4>}
-              {answer.records.ipv6 && <IPV6 ipv6={answer.records.ipv6}></IPV6>}
+              {answer.records.ipv4 && <IPV4 value={answer.records.ipv4}></IPV4>}
+              {answer.records.ipv6 && <IPV6 value={answer.records.ipv6}></IPV6>}
               {answer.records.cname && (
-                <CNAME cname={answer.records.cname}></CNAME>
+                <CNAME value={answer.records.cname}></CNAME>
               )}
-              {answer.records.caa && <CAA caa={answer.records.caa}></CAA>}
-              {answer.records.mx && <MX mx={answer.records.mx}></MX>}
-              {answer.records.txt && <TXT txt={answer.records.txt}></TXT>}
+              {answer.records.caa && <CAA value={answer.records.caa}></CAA>}
+              {answer.records.mx && <MX value={answer.records.mx}></MX>}
+              {answer.records.txt && <TXT value={answer.records.txt}></TXT>}
             </Box>
           )}
         </For>

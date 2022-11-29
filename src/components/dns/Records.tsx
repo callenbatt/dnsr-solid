@@ -5,10 +5,10 @@ import { For } from "solid-js";
 export function Record(props: { type: string; value: string; ttl?: number }) {
   let baseColor;
   switch (props.type) {
-    case "A Record":
+    case "A":
       baseColor = "primary";
       break;
-    case "AAAA Record":
+    case "AAAA":
       baseColor = "info";
       break;
     case "CNAME":
@@ -88,37 +88,35 @@ export function Record(props: { type: string; value: string; ttl?: number }) {
   );
 }
 
-export function IPV4(props: { ipv4: RecordWithTtl[] }) {
+export function IPV4(props: { value: RecordWithTtl[] }) {
   return (
-    <For each={props.ipv4}>
+    <For each={props.value}>
+      {(record) => <Record type="A" value={record.address} ttl={record.ttl} />}
+    </For>
+  );
+}
+
+export function IPV6(props: { value: RecordWithTtl[] }) {
+  return (
+    <For each={props.value}>
       {(record) => (
-        <Record type="A Record" value={record.address} ttl={record.ttl} />
+        <Record type="AAAA" value={record.address} ttl={record.ttl} />
       )}
     </For>
   );
 }
 
-export function IPV6(props: { ipv6: RecordWithTtl[] }) {
+export function CNAME(props: { value: string[] }) {
   return (
-    <For each={props.ipv6}>
-      {(record) => (
-        <Record type="AAAA Record" value={record.address} ttl={record.ttl} />
-      )}
-    </For>
-  );
-}
-
-export function CNAME(props: { cname: string[] }) {
-  return (
-    <For each={props.cname}>
+    <For each={props.value}>
       {(record) => <Record type="CNAME" value={record} />}
     </For>
   );
 }
 
-export function CAA(props: { caa: CaaRecord[] }) {
+export function CAA(props: { value: CaaRecord[] }) {
   return (
-    <For each={props.caa}>
+    <For each={props.value}>
       {(record) => (
         <Record
           type="CAA"
@@ -131,9 +129,9 @@ export function CAA(props: { caa: CaaRecord[] }) {
   );
 }
 
-export function MX(props: { mx: MxRecord[] }) {
+export function MX(props: { value: MxRecord[] }) {
   return (
-    <For each={props.mx}>
+    <For each={props.value}>
       {(record) => (
         <Record
           type="MX"
@@ -144,9 +142,9 @@ export function MX(props: { mx: MxRecord[] }) {
   );
 }
 
-export function TXT(props: { txt: string[][] }) {
+export function TXT(props: { value: string[][] }) {
   return (
-    <For each={props.txt}>
+    <For each={props.value}>
       {(record) => <Record type="TXT" value={record.join(", ")} />}
     </For>
   );
