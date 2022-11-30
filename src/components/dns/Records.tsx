@@ -32,6 +32,7 @@ export function Record(props: { type: string; value: string; ttl?: number }) {
       _dark={{
         color: `${baseColor}.100`,
       }}
+      m={1}
     >
       <Box
         display="flex"

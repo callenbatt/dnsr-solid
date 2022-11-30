@@ -9,6 +9,11 @@ import { httpsCallable } from "firebase/functions";
 import { Flex, Box } from "@hope-ui/core";
 import { DoHAnswer } from "./components/dns/DoHAnswer";
 
+type dohQuery = {
+  hostname: string;
+  resolver: "dns.google/resolve" | "cloudflare-dns.com/dns-query";
+};
+
 type QueryJSON = {
   Question?: string[];
   Answer?: string[];
@@ -70,12 +75,20 @@ const callCloudflareQuery = async (hostname: string) => {
   return await res.json();
 };
 
-const callGoogleQuery = async (hostname: string) => {
+const dohQuery = async (props: {
+  resolver: string;
+  hostname: string | undefined;
+}) => {
+  const { resolver, hostname } = { ...props };
+  if (!hostname) return;
   const dnsTypes = Object.keys(DNSTypeValues);
   const responses = await Promise.all(
     dnsTypes.map(async (type) => {
       const response = await fetch(
-        `https://dns.google/resolve?name=${hostname}&type=${type}`
+        `https://${resolver}?name=${hostname}&type=${type}`,
+        {
+          headers: { accept: "application/dns-json" },
+        }
       );
       return await response.json();
     })
@@ -111,29 +124,48 @@ const callGoogleQuery = async (hostname: string) => {
       }
     });
   });
+  console.log(responses);
   return records;
 };
 
 const App: Component = () => {
   const [hostname, setHostname] = createSignal<string>();
-
+  const search = window.location.search;
+  console.log(search);
   const [authoritativeAnswer] = createResource(
     hostname,
     callAuthoratativeQuery
   );
 
-  const [cloudflareAnswer] = createResource(hostname, callCloudflareQuery);
+  const [cloudflareAnswer] = createResource(
+    () => ({ hostname: hostname(), resolver: "cloudflare-dns.com/dns-query" }),
+    dohQuery
+  );
 
-  const [googleAnswer] = createResource(hostname, callGoogleQuery);
+  const [googleAnswer] = createResource(
+    () => ({ hostname: hostname(), resolver: "dns.google/resolve" }),
+    dohQuery
+  );
+
+  const [quad9Answer] = createResource(
+    () => ({ hostname: hostname(), resolver: "dns.quad9.net:5053/dns-query" }),
+    dohQuery
+  );
+
+  const [alibabaAnswer] = createResource(
+    () => ({ hostname: hostname(), resolver: "dns.alidns.com/resolve" }),
+    dohQuery
+  );
+
   return (
     <>
       <Header handleHostname={setHostname} />
       <Flex w="fit-content" justifyContent="center">
         <AuthoritativeAnswer authoritativeAnswer={authoritativeAnswer()} />
-        <DoHAnswer records={googleAnswer()} />
-        <Box flexGrow="1">
-          <pre>{JSON.stringify(cloudflareAnswer(), null, 2)}</pre>
-        </Box>
+        <DoHAnswer resolver="Google" records={googleAnswer()} />
+        <DoHAnswer resolver="Cloudflare" records={cloudflareAnswer()} />
+        <DoHAnswer resolver="Quad9" records={quad9Answer()} />
+        <DoHAnswer resolver="Alibaba" records={alibabaAnswer()} />
       </Flex>
     </>
   );
