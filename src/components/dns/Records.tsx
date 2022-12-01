@@ -20,8 +20,9 @@ export function Record(props: { type: string; value: string; ttl?: number }) {
     case "CAA":
       baseColor = "danger";
       break;
-    default:
+    case "TXT":
       baseColor = "neutral";
+      break;
   }
 
   return (

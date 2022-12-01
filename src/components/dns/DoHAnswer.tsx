@@ -16,6 +16,7 @@ type Record = {
 export function DoHAnswer(props: {
   resolver: string;
   records: Record[] | undefined;
+  foo?: string;
 }) {
   return (
     <Box display="flex" flexGrow="1" flexDirection="column" m={2}>

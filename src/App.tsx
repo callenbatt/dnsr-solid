@@ -1,4 +1,4 @@
-import { Component, createResource, createSignal } from "solid-js";
+import { Component, createResource, createSignal, onMount } from "solid-js";
 // import { QueryInput } from "./QueryInput";
 import { Header } from "./Header";
 import { AuthoritativeAnswer } from "./components/dns/AuthoritativeAnswer";
@@ -100,6 +100,9 @@ const dohQuery = async (props: {
     if (!response.Answer) return;
 
     response.Answer.forEach((answer: Answer) => {
+      if (!Object.keys(DNSTypeValues).includes(answer.type.toString())) {
+        return;
+      }
       const data = {
         type: DNSTypeValues[answer.type as keyof typeof DNSTypeValues],
         value: answer.data,
@@ -124,14 +127,18 @@ const dohQuery = async (props: {
       }
     });
   });
-  console.log(responses);
   return records;
 };
 
 const App: Component = () => {
+  
+  onMount(() => {
+    console.log(window.location.search);
+  });
+
   const [hostname, setHostname] = createSignal<string>();
-  const search = window.location.search;
-  console.log(search);
+  // const search = window.location.search;
+  // console.log(search);
   const [authoritativeAnswer] = createResource(
     hostname,
     callAuthoratativeQuery
@@ -141,6 +148,10 @@ const App: Component = () => {
     () => ({ hostname: hostname(), resolver: "cloudflare-dns.com/dns-query" }),
     dohQuery
   );
+
+  const cloudflareDisplay = () => {
+    const answers = cloudflareAnswer();
+  };
 
   const [googleAnswer] = createResource(
     () => ({ hostname: hostname(), resolver: "dns.google/resolve" }),
@@ -159,6 +170,7 @@ const App: Component = () => {
 
   return (
     <>
+      {console.log(`quad 9: ${quad9Answer()}`)}
       <Header handleHostname={setHostname} />
       <Flex w="fit-content" justifyContent="center">
         <AuthoritativeAnswer authoritativeAnswer={authoritativeAnswer()} />
